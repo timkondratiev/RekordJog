@@ -23,7 +23,10 @@ pip3 install -r requirements.txt
 ```
 ## Usage
 
-1. Make sure the controller is connected and recognised by the system.
+1. Make sure the controller is connected and recognised by the system by running:
+```bash
+python3 checkForMidiDevices.py
+```
 2. Launch the app in Terminal:
 ```bash
 python3 app.py
