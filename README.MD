@@ -1,3 +1,12 @@
+#***STARLIGHT UPDATE***
+
+jog gives values of 0 or 127, no in betweens
+
+Started to implement buttons clicked with shift hold: "cue master" which should change the knob "headphone mix" to value '127' and "cue+mix" to value '63'.
+Unfortunately i couldn't find the midi mappings for the DDJ-SX, this was the only value missin in the docs?
+
+Happy DJ'ing!
+
 # RekordJog: a translator from third-party controllers to Rekordbox.
 
 ## Description
@@ -78,9 +87,4 @@ MIDI messages reference: https://www.midi.org/specifications-old/item/table-2-ex
 https://www.midi.org/specifications-old/item/table-3-control-change-messages-data-bytes-2
 
 
-##STARLIGHT UPDATE***
 
-jog gives values of 0 or 127, no in betweens
-
-Started to implement buttons clicked with shift hold: "cue master" which should change the knob "headphone mix" to value '127' and "cue+mix" to value '63'.
-Unfortunately i couldn't find the midi mappings for the DDJ-SX, this was the only value missin in the docs?
