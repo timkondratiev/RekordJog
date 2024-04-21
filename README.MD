@@ -2,7 +2,7 @@
 
 ## Description
 
-This program allows jog wheels and pitch control on third-party controllers to function with Rekordbox 6. Currently, it is optimized for the Allen & Heath Xone:4D. To use it with other controllers, you'll need to modify and optimize the source code. I may make this program universal in the future if there is enough interest.
+This program allows jog wheels and pitch control on third-party controllers to function with Rekordbox 6. Currently, it is optimized for the Hercules Starlight. To use it with other controllers, you'll need to modify and optimize the source code. I may make this program universal in the future if there is enough interest.
 
 Please note that a paid subscription for AlphaTheta (Pioneer) Rekordbox 6 is required for this program to run properly.
 
@@ -36,10 +36,6 @@ python3 app.py
 5. When the DJ session is over, stop the app by pressing `Ctrl+C` in the Terminal where the app was launched.
 
 ## MIDI mappings
-
-### Allen & Heath Xone:4D
-
-For better precision, 2 faders are used for each deck pitch control. 2-nd fader increments smaller values.
 
 ## How to map jog wheels
 
@@ -80,3 +76,10 @@ Hex to decimal converter: https://www.rapidtables.com/convert/number/hex-to-deci
 MIDI messages reference: https://www.midi.org/specifications-old/item/table-2-expanded-messages-list-status-bytes
 
 https://www.midi.org/specifications-old/item/table-3-control-change-messages-data-bytes-2
+
+
+****STARLIGHT UPDATE***
+jog gives values of 0 or 127, no in betweens
+
+Started to implement buttons clicked with shift hold: "cue master" which should change the knob "headphone mix" to value '127' and "cue+mix" to value '63'.
+Unfortunately i couldn't find the midi mappings for the DDJ-SX, this was the only value missin in the docs?
