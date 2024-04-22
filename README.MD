@@ -80,6 +80,9 @@ I used this article as a reference. There is a lot of useful information. https:
 
 And also these resources were handy:
 
+Pioneer DDJ-SX reference for MIDI mapping: https://www.pioneerdj.com/-/media/pioneerdj/software-info/controller/ddj-sx/ddj-sx_list_of_midi_messages_e.pdf
+You can also find it in Rekordbox source files. For mac the file is at: /Applications/rekordbox 6/rekordbox.app/Contents/Resources/MidiMappings/PIONEER DDJ-SX.midi.csv
+
 Hex to decimal converter: https://www.rapidtables.com/convert/number/hex-to-decimal.html
 
 MIDI messages reference: https://www.midi.org/specifications-old/item/table-2-expanded-messages-list-status-bytes
