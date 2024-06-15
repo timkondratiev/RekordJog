@@ -3,7 +3,7 @@ import mido
 
 
 rtmidi = mido.Backend('mido.backends.rtmidi', load=True)
-midi_inp = rtmidi.open_input("Allen&Heath Xone:4D XONE:4D")
+midi_inp = rtmidi.open_input("controller")
 midi_out = rtmidi.open_output("PIONEER DDJ-SX", True)
 
 # The JOG_MULTIPLIER is required for smooth jog operation. 
