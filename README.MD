@@ -2,7 +2,7 @@
 
 ## Description
 
-This program allows jog wheels and pitch control on third-party controllers to function with Rekordbox 6. Currently, it is optimized for the Allen & Heath Xone:4D. To use it with other controllers, you'll need to modify and optimize the source code. I may make this program universal in the future if there is enough interest.
+This program allows jog wheels and pitch control on third-party controllers to work in Rekordbox 6 and 7. Currently, it is optimized for the Allen & Heath Xone:4D. To use it with other controllers, you'll need to modify and optimize the source code. I may make this program universal in the future if there is enough interest.
 
 Please note that a paid subscription for AlphaTheta (Pioneer) Rekordbox 6 is required for this program to run properly.
 
