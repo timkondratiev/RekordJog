@@ -2,9 +2,9 @@ import math
 import mido
 
 
-rtmidi = mido.Backend('mido.backends.rtmidi', load=True)
-midi_inp = rtmidi.open_input("controller")
-midi_out = rtmidi.open_output("PIONEER DDJ-SX", True)
+mido.Backend('mido.backends.rtmidi', load=True)
+midi_inp = mido.open_input("controller")
+midi_out = mido.open_output("PIONEER DDJ-SX", True)
 
 # The JOG_MULTIPLIER is required for smooth jog operation. 
 # Pioneer controllers seem to be sending MIDI signal at a much higher rate than XONE:4D. 
@@ -32,63 +32,63 @@ CONV_J_VAL = {
     98:48
     }
 
-tempo_values = [
-    [63, 63],
-    [63, 63],
-    [63, 63],
-    [63, 63],
-]
+tempo_values = {
+    0:[63, 63],
+    1:[63, 63],
+    2:[63, 63],
+    3:[63, 63],
+}
 
-JOG_CODES = [
-    [0xBF, 0x25],
-    [0xBF, 0x2D],
-    [0xBE, 0x25],
-    [0xBE, 0x2D],
-]
-
-
-
-TOUCH_ON_CODES = [
-    [0x9F, 0x26],
-    [0x9F, 0x46],    
-    [0x9E, 0x26],
-    [0x9E, 0x46],
-]
-
-TOUCH_OFF_CODES = [
-    [0x8F, 0x26],
-    [0x8F, 0x46],    
-    [0x8E, 0x26],
-    [0x8E, 0x46],
-]
+JOG_CODES = {
+    [0xBF, 0x25]:0,
+    [0xBF, 0x2D]:1,
+    [0xBE, 0x25]:2,
+    [0xBE, 0x2D]:3,
+}
 
 
 
-TEMPO_BIG_CODES = [
-    [0xbf, 0x11],
-    [0xbe, 0x11],
-    [0xbf, 0x1f],
-    [0xbe, 0x1f],
-    [0xbf, 0x13],
-    [0xbe, 0x13],
-    [0xbf, 0x1d],
-    [0xbe, 0x1d],
-]
+TOUCH_ON_CODES = {
+    [0x9F, 0x26]:0,
+    [0x9F, 0x46]:1,    
+    [0x9E, 0x26]:2,
+    [0x9E, 0x46]:3,
+}
+
+TOUCH_OFF_CODES = {
+    [0x8F, 0x26]:0,
+    [0x8F, 0x46]:1,    
+    [0x8E, 0x26]:2,
+    [0x8E, 0x46]:3,
+}
 
 
-TEMPO_SMALL_CODES = [
-    [0xbf, 0x10],
-    [0xbe, 0x10],
-    [0xbf, 0x1e],
-    [0xbe, 0x1e],
-    [0xbf, 0x12],
-    [0xbe, 0x12],
-    [0xbf, 0x1c],
-    [0xbe, 0x1c],
-]
+
+TEMPO_BIG_CODES = {
+    [0xbf, 0x11]:0,
+    [0xbe, 0x11]:1,
+    [0xbf, 0x1f]:2,
+    [0xbe, 0x1f]:3,
+    [0xbf, 0x13]:4,
+    [0xbe, 0x13]:5,
+    [0xbf, 0x1d]:6,
+    [0xbe, 0x1d]:7,
+}
+
+
+TEMPO_SMALL_CODES = {
+    [0xbf, 0x10]:0,
+    [0xbe, 0x10]:1,
+    [0xbf, 0x1e]:2,
+    [0xbe, 0x1e]:3,
+    [0xbf, 0x12]:4,
+    [0xbe, 0x12]:5,
+    [0xbf, 0x1c]:6,
+    [0xbe, 0x1c]:7,
+}
 
 def jog(msg):
-    id = JOG_CODES.index(msg.bytes()[:2])
+    id = JOG_CODES[msg.bytes()[:2]
     v = CONV_J_VAL[msg.bytes()[2]]
 
     ms = mido.Message.from_bytes([176+id, 0x22, v])
@@ -110,22 +110,22 @@ while True:
         jog(ims)
     
     elif ims_2b in TOUCH_ON_CODES:
-        deck_id = TOUCH_ON_CODES.index(ims_2b)
+        deck_id = TOUCH_ON_CODES[ims_2b]
         touch = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x7F])
         midi_out.send(touch)
 
     elif ims_2b in TOUCH_OFF_CODES:
-        deck_id = TOUCH_OFF_CODES.index(ims_2b)
+        deck_id = TOUCH_OFF_CODES[ims_2b]
         release = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x00])
         midi_out.send(release)
     
     elif ims_2b in TEMPO_BIG_CODES:
-        deck_id = math.floor(TEMPO_BIG_CODES.index(ims_2b) / 2)
+        deck_id = math.floor(TEMPO_BIG_CODES[ims_2b] / 2)
         tempo_values[deck_id][0] = 127 - ims.bytes()[2]
         tempo(deck_id)
 
     elif ims_2b in TEMPO_SMALL_CODES:
-        deck_id = math.floor(TEMPO_SMALL_CODES.index(ims_2b) / 2)
+        deck_id = math.floor(TEMPO_SMALL_CODES[ims_2b] / 2)
         tempo_values[deck_id][1] =  127 - ims.bytes()[2]
         tempo(deck_id)
 
