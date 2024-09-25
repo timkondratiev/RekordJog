@@ -2,13 +2,20 @@
 
 ## Description
 
-This program allows jog wheels and pitch control on third-party controllers to work in Rekordbox 6 and 7. Currently, it is optimized for the Allen & Heath Xone:4D. To use it with other controllers, you'll need to modify and optimize the source code. I may make this program universal in the future if there is enough interest.
+This program allows jog wheels and pitch control on third-party controllers to work in Rekordbox 6 and 7. Currently out of the box supported and tested Devices are:
+-   Allen & Heath
+    -   Xone:4D
+-   Hercules DJControl
+    -   Inpulse 200
+    -   Mix
+
+To use it with other controllers, you'll need to find the MIDI calls and their pattern using MIDI-OX or a similar tool and modify the source code accordingly. Feel free to send a Pull Request!
 
 Please note that a paid subscription for AlphaTheta (Pioneer) Rekordbox 6 is required for this program to run properly.
 
-## Installation
+## Installation MacOS/Linux
 
-1. Clone the repository and open the directory in Terminal.
+1. Download/Clone the repository and open the directory in Terminal.
 2. Create a virtual environment:
 ```bash
 python3 -m venv .venv
@@ -21,27 +28,57 @@ source .venv/bin/activate
 ```bash
 pip3 install -r requirements.txt
 ```
+5. Copy and replace the DDJ-SX Mapping in Rekordbox' installation folder with the files found in "pioneer_mappings"
+```bash
+MACOSPATH_HERE
+```
+
+## Installation Windows
+### Prerequisites
+    loopMIDI: https://www.tobias-erichsen.de/software/loopmidi.html
+    Create a device in loopMIDI called "PIONEER DDJ-SX
+    Note: The virtual DDJ-SX created in loopMIDI is only available while loopMIDI is running!
+
+1. Download/Clone the repository and open the directory in Terminal.
+2. Create a virtual environment:
+```bash
+python -m venv .venv
+```
+3. Activate the virtual environment:
+```bash
+.venv\Scripts\activate.bat
+```
+4. Install requirements:
+```bash
+pip install -r requirements.txt
+```
+5. Copy and replace the DDJ-SX Mapping in Rekordbox' installation folder with the files found in `pioneer_mappings`
+```bash
+"C:\Program Files\Pioneer\rekordbox [VERSION]\MidiMappings"
+```
+
 ## Usage
-
-1. Make sure the controller is connected and recognised by the system by running:
+1. Windows Only: Start loopMIDI
+2. Open the RekordJog directory in Terminal.
+3. Launch the app in Terminal:
 ```bash
-python3 checkForMidiDevices.py
+python3 RekordJog_YourDevice.py
 ```
-2. Launch the app in Terminal:
-```bash
-python3 app.py
-```
-3. Open Rekordbox.
-4. (Optional) Import MIDI mapping for your controller from `controller_mapping` directory. Everything should work now.
-5. When the DJ session is over, stop the app by pressing `Ctrl+C` in the Terminal where the app was launched.
+4. Select your Devices
+5. Open Rekordbox.
+6. (Optional) Import MIDI mapping for your controller from `midi_mappings` directory. Everything should work now.
+5. When the DJ session is over, stop the app by pressing `Ctrl+C` in the Terminal where the app was launched. In some cases you need to touch a jogweel once if it isn't closing immediately.
 
-## MIDI mappings
+## MIDI mappings and specialties for different controllers:
+### Hercules DJControl
+You need to go to "MIDI" and change the Setting for PIONEER DDJ-SX Tempo from 0h-3FFFh to 0h-7Fh in order for the tempo sliders to work!
 
 ### Allen & Heath Xone:4D
 
 For better precision, 2 faders are used for each deck pitch control. 2-nd fader increments smaller values.
 
-## How to map jog wheels
+## For Developers:
+### How to map jog wheels
 
 First, you need to figure out what MIDI message is sent on your jog turn. Then analyze which values are sent at different rotation speed.
 
