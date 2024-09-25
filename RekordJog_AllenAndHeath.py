@@ -1,3 +1,4 @@
+import os
 import mido
 import math
 from functions.check_config import check_config
@@ -37,56 +38,56 @@ tempo_values = [
     [63, 63],
 ]
 
-JOG_CODES = [
-    [0xBF, 0x25],
-    [0xBF, 0x2D],
-    [0xBE, 0x25],
-    [0xBE, 0x2D],
-]
+JOG_CODES = {
+    (0xBF, 0x25):0,
+    (0xBF, 0x2D):1,
+    (0xBE, 0x25):2,
+    (0xBE, 0x2D):3,
+}
 
 
-
-TOUCH_ON_CODES = [
-    [0x9F, 0x26],
-    [0x9F, 0x46],    
-    [0x9E, 0x26],
-    [0x9E, 0x46],
-]
-
-TOUCH_OFF_CODES = [
-    [0x8F, 0x26],
-    [0x8F, 0x46],    
-    [0x8E, 0x26],
-    [0x8E, 0x46],
-]
+TOUCH_ON_CODES = {
+    (0x9F, 0x26):0,
+    (0x9F, 0x46):1,
+    (0x9E, 0x26):2,
+    (0x9E, 0x46):3,
+}
 
 
-
-TEMPO_BIG_CODES = [
-    [0xbf, 0x11],
-    [0xbe, 0x11],
-    [0xbf, 0x1f],
-    [0xbe, 0x1f],
-    [0xbf, 0x13],
-    [0xbe, 0x13],
-    [0xbf, 0x1d],
-    [0xbe, 0x1d],
-]
+TOUCH_OFF_CODES = {
+    (0x8F, 0x26):0,
+    (0x8F, 0x46):1,
+    (0x8E, 0x26):2,
+    (0x8E, 0x46):3,
+}
 
 
-TEMPO_SMALL_CODES = [
-    [0xbf, 0x10],
-    [0xbe, 0x10],
-    [0xbf, 0x1e],
-    [0xbe, 0x1e],
-    [0xbf, 0x12],
-    [0xbe, 0x12],
-    [0xbf, 0x1c],
-    [0xbe, 0x1c],
-]
+TEMPO_BIG_CODES = {
+    (0xbf, 0x11):0,
+    (0xbe, 0x11):1,
+    (0xbf, 0x1f):2,
+    (0xbe, 0x1f):3,
+    (0xbf, 0x13):4,
+    (0xbe, 0x13):5,
+    (0xbf, 0x1d):6,
+    (0xbe, 0x1d):7,
+}
 
-def jog(msg):
-    id = JOG_CODES.index(msg.bytes()[:2])
+
+TEMPO_SMALL_CODES = {
+    (0xbf, 0x10):0,
+    (0xbe, 0x10):1,
+    (0xbf, 0x1e):2,
+    (0xbe, 0x1e):3,
+    (0xbf, 0x12):4,
+    (0xbe, 0x12):5,
+    (0xbf, 0x1c):6,
+    (0xbe, 0x1c):7,
+}
+
+
+def jog(midi_out, msg):
+    id = JOG_CODES[tuple(msg.bytes()[:2])]
     v = CONV_J_VAL[msg.bytes()[2]]
 
     ms = mido.Message.from_bytes([176+id, 0x22, v])
@@ -94,7 +95,7 @@ def jog(msg):
     for i in range(JOG_MULTIPLIER):
         midi_out.send(ms)
 
-def tempo(id):
+def tempo(midi_out, id):
     msb = mido.Message.from_bytes([0xB0+id, 0x00, tempo_values[id][0]])
     lsb = mido.Message.from_bytes([0xB0+id, 0x20, tempo_values[id][1]])
     midi_out.send(msb)
@@ -103,35 +104,41 @@ def tempo(id):
 def main():
     midi_inp, midi_out = check_config()
     try:
-        with mido.open_input(midi_inp) as midi_inp, mido.open_output(midi_out) as midi_out:
-            rekordjog_start_sequence()
-            wheel_messages_counter = 3
-            while True:
-                    ims = midi_inp.receive()
-                    ims_2b = ims.bytes()[:2]
+        midi_inp_conf, midi_out_conf = check_config()
+        midi_inp = mido.open_input(midi_inp_conf)
+        if os.name == 'nt':
+            midi_out = mido.open_output(midi_out_conf)
+        else:
+            midi_out = mido.open_output("Pioneer DDJ-SX", True)
+        
+        rekordjog_start_sequence()
+        while True:
+                ims = midi_inp.receive()
+                ims_2b = tuple(ims.bytes()[:2])
 
-                    if ims_2b in JOG_CODES:
-                        jog(ims)
-    
-                    elif ims_2b in TOUCH_ON_CODES:
-                        deck_id = TOUCH_ON_CODES.index(ims_2b)
-                        touch = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x7F])
-                        midi_out.send(touch)
+                if ims_2b in JOG_CODES:
+                    jog(midi_out, ims)
 
-                    elif ims_2b in TOUCH_OFF_CODES:
-                        deck_id = TOUCH_OFF_CODES.index(ims_2b)
-                        release = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x00])
-                        midi_out.send(release)
-    
-                    elif ims_2b in TEMPO_BIG_CODES:
-                        deck_id = math.floor(TEMPO_BIG_CODES.index(ims_2b) / 2)
-                        tempo_values[deck_id][0] = 127 - ims.bytes()[2]
-                        tempo(deck_id)
+                elif ims_2b in TOUCH_ON_CODES:
+                    deck_id = TOUCH_ON_CODES[ims_2b]
+                    touch = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x7F])
+                    midi_out.send(touch)
 
-                    elif ims_2b in TEMPO_SMALL_CODES:
-                        deck_id = math.floor(TEMPO_SMALL_CODES.index(ims_2b) / 2)
-                        tempo_values[deck_id][1] =  127 - ims.bytes()[2]
-                        tempo(deck_id)
+                elif ims_2b in TOUCH_OFF_CODES:
+                    deck_id = TOUCH_OFF_CODES[ims_2b]
+                    release = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x00])
+                    midi_out.send(release)
+
+                elif ims_2b in TEMPO_BIG_CODES:
+                    deck_id = math.floor(TEMPO_BIG_CODES[ims_2b] / 2)
+                    tempo_values[deck_id][0] = 127 - ims.bytes()[2]
+                    tempo(midi_out, deck_id)
+
+                elif ims_2b in TEMPO_SMALL_CODES:
+                    deck_id = math.floor(TEMPO_SMALL_CODES[ims_2b] / 2)
+                    tempo_values[deck_id][1] =  127 - ims.bytes()[2]
+                    tempo(midi_out, deck_id)
+
     except KeyboardInterrupt:
         print("\nClosing RekordJog, bye.")
 
