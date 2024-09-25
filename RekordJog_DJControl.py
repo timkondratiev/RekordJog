@@ -14,7 +14,7 @@ PIONEER_PITCH_CONTROL = 0x70
 def main():
     midi_inp, midi_out = check_config()
     try:
-        with mido.open_input(midi_inp) as midi_inp, rtmidi.open_output(midi_out) as midi_out:
+        with mido.open_input(midi_inp) as midi_inp, mido.open_output(midi_out) as midi_out:
             rekordjog_start_sequence()
             wheel_messages_counter = 3
             while True:
