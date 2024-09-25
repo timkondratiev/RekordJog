@@ -1,10 +1,8 @@
-import math
 import mido
+import math
+from functions.check_config import check_config
+from functions.rekordjog_start_sequence import rekordjog_start_sequence
 
-
-rtmidi = mido.Backend('mido.backends.rtmidi', load=True)
-midi_inp = rtmidi.open_input("controller")
-midi_out = rtmidi.open_output("PIONEER DDJ-SX", True)
 
 # The JOG_MULTIPLIER is required for smooth jog operation. 
 # Pioneer controllers seem to be sending MIDI signal at a much higher rate than XONE:4D. 
@@ -102,30 +100,40 @@ def tempo(id):
     midi_out.send(msb)
     midi_out.send(lsb)
 
-while True:
-    ims = midi_inp.receive()
-    ims_2b = ims.bytes()[:2]
+def main():
+    midi_inp, midi_out = check_config()
+    try:
+        with mido.open_input(midi_inp) as midi_inp, mido.open_output(midi_out) as midi_out:
+            rekordjog_start_sequence()
+            wheel_messages_counter = 3
+            while True:
+                    ims = midi_inp.receive()
+                    ims_2b = ims.bytes()[:2]
 
-    if ims_2b in JOG_CODES:
-        jog(ims)
+                    if ims_2b in JOG_CODES:
+                        jog(ims)
     
-    elif ims_2b in TOUCH_ON_CODES:
-        deck_id = TOUCH_ON_CODES.index(ims_2b)
-        touch = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x7F])
-        midi_out.send(touch)
+                    elif ims_2b in TOUCH_ON_CODES:
+                        deck_id = TOUCH_ON_CODES.index(ims_2b)
+                        touch = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x7F])
+                        midi_out.send(touch)
 
-    elif ims_2b in TOUCH_OFF_CODES:
-        deck_id = TOUCH_OFF_CODES.index(ims_2b)
-        release = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x00])
-        midi_out.send(release)
+                    elif ims_2b in TOUCH_OFF_CODES:
+                        deck_id = TOUCH_OFF_CODES.index(ims_2b)
+                        release = mido.Message.from_bytes([0x90+deck_id, 0x36, 0x00])
+                        midi_out.send(release)
     
-    elif ims_2b in TEMPO_BIG_CODES:
-        deck_id = math.floor(TEMPO_BIG_CODES.index(ims_2b) / 2)
-        tempo_values[deck_id][0] = 127 - ims.bytes()[2]
-        tempo(deck_id)
+                    elif ims_2b in TEMPO_BIG_CODES:
+                        deck_id = math.floor(TEMPO_BIG_CODES.index(ims_2b) / 2)
+                        tempo_values[deck_id][0] = 127 - ims.bytes()[2]
+                        tempo(deck_id)
 
-    elif ims_2b in TEMPO_SMALL_CODES:
-        deck_id = math.floor(TEMPO_SMALL_CODES.index(ims_2b) / 2)
-        tempo_values[deck_id][1] =  127 - ims.bytes()[2]
-        tempo(deck_id)
+                    elif ims_2b in TEMPO_SMALL_CODES:
+                        deck_id = math.floor(TEMPO_SMALL_CODES.index(ims_2b) / 2)
+                        tempo_values[deck_id][1] =  127 - ims.bytes()[2]
+                        tempo(deck_id)
+    except KeyboardInterrupt:
+        print("\nClosing RekordJog, bye.")
 
+if __name__ == "__main__":
+    main()
